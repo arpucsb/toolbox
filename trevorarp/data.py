@@ -46,6 +46,8 @@ nSOTColumnSpec = {
 "Four Terminal Voltage Biased":(-1, "C", (0,2,"Gate Voltage"), (1,3,"B Field"),(4,5), ("Voltage", "Current")),
 # "Dual Gate Voltage Biased Transport", ["p0 Index", "n0 Index","p0", "n0"], ["Vt", "Vb", "Voltage Lock-In", "Current Lock-In"]
 "Dual Gate Voltage Biased Transport":(-1, "F", (0,2,"p0"), (1,3,"n0"), (4,5,6,7), ("Vt", "Vb", "Voltage", "Current")),
+# 'n0p0 linecut vs DC bias sweep',['Trace_retrace','DC bias index','Gate index','DC bias value', 'n0 Value', 'p0 value','Bottom gate value', 'Top gate value'],['Idc','IacX','IacY','VacX','VacY'])
+'n0p0 linecut vs DC bias sweep':(0,"F",(2,4,"n0"),(1,3,"Vbias"),(5,6,7,8,9,10,11,12),("p0","Vb","Vt", 'Idc','IacX','IacY','VacX','VacY')),
 # '2D SQUID Transport Line',['Trace_retrace','Bottom gate index','Top gate index','Bottom gate value','Top gate value'],['SQUID_x','SQUID_y','I_x','V_x']
 '2D SQUID Transport Line':(0, "C", (1,3,"Vb"), (2,4,"Vt"), (5,6,7,8), ('SQUID_x','SQUID_y','I_x','V_x')),
 # dv.new('2D SQUID n0p0',['Trace_retrace','n0 index','p0 index', 'n0', 'p0','Bottom gate value','Top gate value'],['SQUID_x','SQUID_y','I_x','V_x'])
@@ -62,7 +64,7 @@ nSOTColumnSpec = {
 "2D SQUID Cap n0p0 linecut field":(-1,"C",(0,2,'n0'), (1,4,'B'), (3,5,6,7,8,9,10,11,12), ('p0','Vs', 'Vb', 'SQUID_x', 'SQUID_y', 'Cs', 'Ds', 'X', 'Y')),
 }
 
-def get_dv_data(identifier, remote=None, subfolder=None, params=False, retfilename=False):
+def get_dv_data(identifier, remote=None, subfolder=None, params=False, retfilename=False, oldsystem=False):
     '''
     A function to retrieve data from the datavault using a nanosquid identifier and return is as numpy arrays
 
@@ -74,6 +76,7 @@ def get_dv_data(identifier, remote=None, subfolder=None, params=False, retfilena
             datavault.cd function, i.e. takes a String or list of strings forming a path to the folder.
         params (bool) : If True will return any parameters from the data vault file.
         retfilename : If True will return the name of the datavault file along with the data
+        oldsystem : Identifier not using nanoSQUID Identifiers
     '''
     if remote is None:
         cxn = labrad.connect()
@@ -85,7 +88,10 @@ def get_dv_data(identifier, remote=None, subfolder=None, params=False, retfilena
         dv.cd(subfolder)
 
     drs, fls = dv.dir()
-    filename = [x for x in fls if identifier+" " in x] # the space prevents finding multiples of ten, for example iden-1 and iden-10
+    if oldsystem:
+        filename = [x for x in fls if identifier in x] # For things from other datavaults, not using nanoSQUID identifiers
+    else:
+        filename = [x for x in fls if identifier+" " in x] # the space prevents finding multiples of ten, for example iden-1 and iden-10
 
     if len(filename) == 0:
         raise IOError("Identifier " + identifier + " not found on this data vault.")
