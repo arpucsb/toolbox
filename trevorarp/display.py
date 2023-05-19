@@ -16,6 +16,7 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
+import cmasher as cmr # colorscales
 
 import addcopyfighandler
 from datetime import datetime
@@ -111,7 +112,7 @@ class figure_inches():
             plt.style.use('dark_background')
         else:
             facecolor='w'
-
+        self.axes = []
         self.fig = plt.figure(self.name, figsize=(self.xinches, self.yinches), facecolor=facecolor)
     # end init
 
@@ -172,7 +173,9 @@ class figure_inches():
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
         plt.figure(self.name)
-        return plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder)
+        ax = plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder)
+        self.axes.append(ax)
+        return ax
     # make_axes
 
     def make_3daxes(self, spec=None, zorder=1):
@@ -195,7 +198,9 @@ class figure_inches():
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
         plt.figure(self.name)
-        return plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder, projection='3d')
+        ax =  plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder, projection='3d')
+        self.axes.append(ax)
+        return ax
     # make_3daxes
 
     def make_img_axes(self, spec=None, cbpercent=0.5, cbmargin=0.1, cbheightpercent=0.2, zorder=1):
@@ -233,6 +238,8 @@ class figure_inches():
         cb = plt.axes([xpos+width-cbwidth, ypos+height+margin, cbwidth, cbheight], zorder=zorder)
         xaxis_top(cb)
         cb.__display_default_flag__ = True
+        self.axes.append(ax)
+        self.axes.append(cb)
         return ax, cb
     # make_axes_and_cb
 
@@ -273,7 +280,7 @@ class figure_inches():
         axl = plt.axes([spec[0]+1, spec[1]+1, spec[2]+1, spec[3]+1], zorder=zorderl)
         axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axl.patch.set_alpha(0)
-        axl.tick_params('y', colors=color_left)
+        axl.tick_params('y', which='both', colors=color_left)
         axl.spines['left'].set_color(color_left)
         axl.spines['right'].set_color(color_right)
 
@@ -283,7 +290,9 @@ class figure_inches():
         axr.xaxis.set_visible(False)
         axr.yaxis.tick_right()
         axr.yaxis.set_label_position("right")
-        axr.tick_params('y', colors=color_right)
+        axr.tick_params('y', which='both', colors=color_right)
+        self.axes.append(axl)
+        self.axes.append(axr)
         return axl, axr
     # make_dualy_axes
 
@@ -316,7 +325,7 @@ class figure_inches():
         axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder+1)
         axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axb.patch.set_alpha(0)
-        axb.tick_params('x', colors=color_bottom)
+        axb.tick_params('x', which='both', colors=color_bottom)
         axb.spines['bottom'].set_color(color_bottom)
         axb.spines['top'].set_color(color_top)
 
@@ -326,7 +335,9 @@ class figure_inches():
         axt.yaxis.set_visible(False)
         axt.xaxis.tick_top()
         axt.xaxis.set_label_position("top")
-        axt.tick_params('x', colors=color_top)
+        axt.tick_params('x', which='both', colors=color_top)
+        self.axes.append(axb)
+        self.axes.append(axt)
         return axb, axt
     # make_dualx_axes
 
@@ -365,7 +376,7 @@ class figure_inches():
         axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axl.patch.set_alpha(0)
         axl.xaxis.set_visible(False)
-        axl.tick_params('y', colors=color_left)
+        axl.tick_params('y', which='both', colors=color_left)
         axl.spines['left'].set_color(color_left)
         axl.spines['right'].set_color(color_right)
         axl.spines['top'].set_color(color_top)
@@ -377,7 +388,7 @@ class figure_inches():
         axr.xaxis.set_visible(False)
         axr.yaxis.tick_right()
         axr.yaxis.set_label_position("right")
-        axr.tick_params('y', colors=color_right)
+        axr.tick_params('y', which='both', colors=color_right)
 
         axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder+1)
         axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
@@ -385,7 +396,7 @@ class figure_inches():
         axb.yaxis.set_visible(False)
         axb.xaxis.tick_bottom()
         axb.xaxis.set_label_position("bottom")
-        axb.tick_params('x', colors=color_bottom)
+        axb.tick_params('x', which='both', colors=color_bottom)
 
         axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder)
         axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
@@ -393,7 +404,11 @@ class figure_inches():
         axt.yaxis.set_visible(False)
         axt.xaxis.tick_top()
         axt.xaxis.set_label_position("top")
-        axt.tick_params('x', colors=color_top)
+        axt.tick_params('x', which='both', colors=color_top)
+        self.axes.append(axb)
+        self.axes.append(axt)
+        self.axes.append(axl)
+        self.axes.append(axr)
         return axl, axr, axb, axt
     # make_dualx_axes
 
@@ -533,8 +548,8 @@ def change_axes_colors(ax, c):
     '''
     ax.yaxis.label.set_color(c)
     ax.xaxis.label.set_color(c)
-    ax.tick_params(axis='x', colors=c)
-    ax.tick_params(axis='y', colors=c)
+    ax.tick_params(axis='x', which='both', colors=c)
+    ax.tick_params(axis='y', which='both', colors=c)
     ax.spines['bottom'].set_color(c)
     ax.spines['top'].set_color(c)
     ax.spines['left'].set_color(c)
@@ -600,7 +615,7 @@ def colorscale_map(darray, mapname='viridis', cmin=None, cmax=None, centerzero=F
     return cmap, cNorm, scalarMap
 # end colorscale_map
 
-def make_colorbar(ax, cmap, cnorm, orientation='vertical', ticks=None, ticklabels=None, color='k', alpha=None):
+def make_colorbar(ax, cmap, cnorm, title=None, ttlparams=None, orientation='vertical', ticks=None, ticklabels=None, color='k', alpha=None):
     '''
     Instantiates and returns a colorbar object for the given axes, with a few more options than
     instantiating directly
@@ -609,6 +624,8 @@ def make_colorbar(ax, cmap, cnorm, orientation='vertical', ticks=None, ticklabel
         ax : The axes to make the colorbar on.
         cmap : The Colormap
         norm : The Normalization
+        title: Text to place to the left on a horizonal colorbar or at the top of a vertical colorbar
+        ttlparams: Dictionary of text parameters to pass to the title annotation
         orientation (str, optional) : 'vertical' (default) or 'horizontal' orientation
         ticks (list, optional) : the locations of the ticks. If None will let matplotlib automatically set them.
         ticklabels (list, optional) : the labels of the ticks. If None will let matplotlib automatically set them.
@@ -636,6 +653,13 @@ def make_colorbar(ax, cmap, cnorm, orientation='vertical', ticks=None, ticklabel
     if xtop:
         xaxis_top(ax)
         ax.tick_params(pad=0)
+    if title is not None:
+        if ttlparams is None:
+            ttlparams = {}
+        if orientation == 'horizontal':
+            ax.text(-0.05, 0.5, title, transform=ax.transAxes, va='center', ha='right', **ttlparams)
+        else:
+            ax.text(0.5, 1.05, title, transform=ax.transAxes, va='bottom', ha='center', **ttlparams)
     return cb
 # end make_colorbar
 
