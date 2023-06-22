@@ -133,7 +133,7 @@ def get_dv_data(identifier, remote=None, subfolder=None, params=False, retfilena
     else:
         return data
 
-def retrievefromvault(vaultdir, filename, host='localhost', password='pass'):
+def retrievefromvault(vaultdir, filename):
     '''
     A generic tool to retrieve files from a LabRAD datavault
 
@@ -156,6 +156,48 @@ def retrievefromvault(vaultdir, filename, host='localhost', password='pass'):
     dv.open(datafile)
     return np.array(dv.get())
 #
+
+def reshape_columns(data, shape=None, retrace=False):
+    '''
+    Simple function to take a data array and reshapes all columns of the array into new 2D arrays of size (rows, cols).
+    If shape is None assumes the first two colums are the row index and column index respectively or if retrace is true
+    then the first column is the trace/retrace index (with 0 for trace, 1 for retrace).
+
+    Args:
+        data: The data to reshape
+        shape: The resulting arrays will have shape=(rows, cols). If None the shape will be determined as described above
+        retrace: If the first column is the trace retract index it will return two sets based on the trace/retract index
+
+    Returns:
+        A list of arrays for each column of data of shape (rows, cols)
+    '''
+    if shape is None:
+        # Subtract off minimum to deal with index starting from 1 which happens in some older scripts
+        if retrace:
+            rows = int(np.max(data[1])) - int(np.min(data[1])) + 1
+            cols = int(np.max(data[2])) - int(np.min(data[2])) + 1
+        else:
+            rows = int(np.max(data[0])) - int(np.min(data[0])) + 1
+            cols = int(np.max(data[1])) - int(np.min(data[1])) + 1
+        shape = (rows, cols)
+
+    if retrace:
+        trace = data[data[:, 0] == 0, :]
+        retrace = data[data[:, 0] == 1, :]
+        dshp = trace.shape
+        tr = []
+        for j in range(dshp[1]):
+            tr.append(np.reshape(trace[:, j], shape))
+        rt = []
+        for j in range(dshp[1]):
+            rt.append(np.reshape(retrace[:, j], shape))
+        return tr, rt
+    else:
+        dshp = data.shape
+        ret = []
+        for j in range(dshp[1]):
+            ret.append(np.reshape(data[:,j], shape))
+        return ret
 
 def datavault2numpy(filename):
     '''
@@ -271,6 +313,7 @@ def reshape_from_spec(d, spec, params=None, offbyone=False, iden=None):
         spec (tuple): The specification for the reshape (follows normal convention)
         params (tuple) : The datavult parameters for the data, to return as normal
         offbyone (bool) : Correct for the fact that some heathens 1 index their data.
+            (Deprecated but left in for backwards compatibility)
 
     Returns in the format:
     row_values, colum_values, dependent_variables_trace, dependent_variables_retrace, labels
@@ -290,11 +333,13 @@ def reshape_from_spec(d, spec, params=None, offbyone=False, iden=None):
             retrace = d
 
         if offbyone:
-            rows = int(np.max(trace[:,rvars[0]]))# + 1
-            cols = int(np.max(trace[:,cvars[0]]))# + 1
+            print("offbyone option deprecated, should no longer be necessary")
+            rows = int(np.max(trace[:,rvars[0]]))
+            cols = int(np.max(trace[:,cvars[0]]))
         else:
-            rows = int(np.max(trace[:,rvars[0]])) + 1
-            cols = int(np.max(trace[:,cvars[0]])) + 1
+            # Subtract off minimum to deal with index starting from 1 which happens in some older scripts
+            rows = int(np.max(trace[:,rvars[0]])) - int(np.min(trace[:,rvars[0]])) + 1
+            cols = int(np.max(trace[:,cvars[0]])) - int(np.min(trace[:,cvars[0]])) + 1
 
         #While data is still streeaming in rows, cols may not match the acutal number of rows
         nd = len(trace[:,rvars[1]])
@@ -347,6 +392,7 @@ def reshape_from_spec_3d(d, spec, params=None, offbyone=False, iden=None):
         spec (tuple): The specification for the reshape (follows normal convention)
         params (tuple) : The datavult parameters for the data, to return as normal
         offbyone (bool) : Correct for the fact that some heathens 1 index their data.
+            (Deprecated but left in for backwards compatibility)
 
     Returns in the format:
     row_values, colum_values, dependent_variables_trace, dependent_variables_retrace, labels
@@ -366,23 +412,14 @@ def reshape_from_spec_3d(d, spec, params=None, offbyone=False, iden=None):
             retrace = d
 
         if offbyone:
-            rows = int(np.max(trace[:,rvars[0]]))# + 1
-            cols = int(np.max(trace[:,cvars[0]]))# + 1
-            znum = int(np.max(trace[:,zvars[0]]))# + 1
+            print("offbyone option deprecated, should no longer be necessary")
+            rows = int(np.max(trace[:,rvars[0]]))
+            cols = int(np.max(trace[:,cvars[0]]))
+            znum = int(np.max(trace[:,zvars[0]]))
         else:
-            rows = int(np.max(trace[:,rvars[0]])) + 1
-            cols = int(np.max(trace[:,cvars[0]])) + 1
-            znum = int(np.max(trace[:,zvars[0]])) + 1
-
-        #While data is still streeaming in rows, cols may not match the acutal number of rows
-        # nd = len(trace[:,rvars[1]])
-        # if rows*cols > nd:
-        #     print(iden, "is not complete, loading partially.")
-        #     print(nd, rows, cols)
-        #     rows = nd//cols
-        # elif rows*cols < nd:
-        #     print(iden, "warning row numbers off by one, attempting to correct.")
-        #     rows += 1
+            rows = int(np.max(trace[:, rvars[0]])) - int(np.min(trace[:, rvars[0]])) + 1
+            cols = int(np.max(trace[:, cvars[0]])) - int(np.min(trace[:, cvars[0]])) + 1
+            znum = int(np.max(trace[:, zvars[0]])) - int(np.min(trace[:, zvars[0]])) + 1
 
         rvalues = np.reshape(trace[:,rvars[1]],(znum, rows, cols), order=order)
         cvalues = np.reshape(trace[:,cvars[1]],(znum, rows, cols), order=order)

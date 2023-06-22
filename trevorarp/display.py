@@ -4,7 +4,7 @@ display.py
 A module for general functions related to displaying information, for functions and classes related
 to displaying specific kinds of information see visual.py
 
-Last updated August 2022
+Last updated July 2023
 
 by Trevor Arp
 All Rights Reserved
@@ -26,7 +26,8 @@ import numpy as np
 from scipy.ndimage import center_of_mass
 from scipy.ndimage.interpolation import shift
 
-from trevorarp.fitting import power_law, power_law_fit
+from trevorarp.math import power_law
+from trevorarp.fitting import power_law_fit
 
 class figure_inches():
     '''
@@ -53,7 +54,7 @@ class figure_inches():
 
     def __init__(self, name=None, xinches="1", yinches="1", defaults=None, style='notes', dark=False):
         self.defaults = {
-        'xinches':5.0,
+        'xinches':4.5,
         'yinches':4.8,
         'xmargin':0.8,
         'ymargin':0.55,
@@ -203,7 +204,7 @@ class figure_inches():
         return ax
     # make_3daxes
 
-    def make_img_axes(self, spec=None, cbpercent=0.5, cbmargin=0.1, cbheightpercent=0.2, zorder=1):
+    def make_img_axes(self, spec=None, cbpercent=0.4, cbmargin=0.1, cbheightpercent=0.15, zorder=1):
         '''
         Makes and returns a matplotlib Axes object with a default colorbar.
         To easily make a colorbar in the title area.
@@ -299,7 +300,7 @@ class figure_inches():
     def make_dualx_axes(self, spec=None, color_bottom='k', color_top='k', zorder=1):
         '''
         Makes and returns two overlaid axes, with two y axes sharing the same x-axis. Note, the
-        first axes returned (the bottom x-axis) is "on top" and provides the y-axis
+        first axes returned (the bottom x-axis) is "on bottom" and provides the y-axis
 
         Args:
             spec : A list of the dimensions of the axis [left, bottom, width, height] in inches
@@ -322,14 +323,14 @@ class figure_inches():
         ax0 = plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches])
         ax0.axis('off')
 
-        axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder+1)
+        axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder)
         axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axb.patch.set_alpha(0)
         axb.tick_params('x', which='both', colors=color_bottom)
         axb.spines['bottom'].set_color(color_bottom)
         axb.spines['top'].set_color(color_top)
 
-        axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder)
+        axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder+1)
         axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axt.patch.set_alpha(0)
         axt.yaxis.set_visible(False)
@@ -501,7 +502,7 @@ def figure_format(fntsize=12, font=None, bilinear=True, labelpad=0):
     mpl.rcParams["keymap.fullscreen"] = '' # To prevent f from being fullscreen
 # end figure_format
 
-def notes_format(fntsize=12, tickfntsize=10, font=None, bilinear=True, dark=False):
+def notes_format(fntsize=12, tickfntsize=9, font=None, bilinear=True, dark=False):
     '''
     A simplistic format meant for notes and easy display, allowing axes to be shown
     without having to worry too much about the formatting of the axes.
@@ -522,7 +523,7 @@ def notes_format(fntsize=12, tickfntsize=10, font=None, bilinear=True, dark=Fals
     mpl.rcParams.update({'font.size':fntsize})
     mpl.rcParams.update({'xtick.labelsize':tickfntsize})
     mpl.rcParams.update({'ytick.labelsize':tickfntsize})
-    mpl.rcParams.update({'axes.labelpad': 8})
+    mpl.rcParams.update({'axes.labelpad': 5})
     mpl.rcParams.update({'axes.titlepad': 6})
     mpl.rcParams.update({'xtick.direction':'out'})
     mpl.rcParams.update({'ytick.direction':'out'})

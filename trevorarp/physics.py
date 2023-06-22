@@ -69,7 +69,7 @@ G_Ac = 3*np.sqrt(3)*(G_a**2)/2 # nm^2 (Unit cell area)
 '''
 import numpy as np
 
-# Fundamental Constatns, SI Values
+# Fundamental Constants, SI Values
 e = 1.602176634e-19 # C (Elementary charge)
 c = 299792458 # m/s (speed of light)
 h = 6.626070040e-34 #J*s
