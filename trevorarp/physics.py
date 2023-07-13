@@ -179,7 +179,7 @@ def field_above_dipoles(m, density, perimeter, height, xrng, yrng, simdensity=10
         numx: The number of points in X to calculate
         numy: The number of points in X to calculate
     Returns:
-        X, Y, field where each are meshgrids of size (numx, numy). Field is in units of Tesla
+        X, Y, Bx, By, Bz where each are meshgrids of size (numx, numy). Field is in units of Tesla
     """
     # Define the device as a polygon
     polygon = Polygon(perimeter)
@@ -211,10 +211,12 @@ def field_above_dipoles(m, density, perimeter, height, xrng, yrng, simdensity=10
     X, Y = np.meshgrid(box_grid_x, box_grid_y)
 
     # Perform the computation
-    f = np.zeros((numx, numy))
+    f = np.zeros((numy, numx, 3))
     for i in range(numy):
         for j in range(numx):
             dist = np.subtract([X[i, j], Y[i, j], height], d)
-            f[i, j] = np.sum([magnetic_dipole(r, m_normed) for r in dist])
-    return X, Y, f
+            l = [magnetic_dipole(r, m_normed) for r in dist]
+            f[i, j, :] = [sum(i) for i in zip(*l)] #np.sum([magnetic_dipole(r, m_normed) for r in dist])
+            # f[i, j,:] = np.sum([magnetic_dipole(r, m_normed) for r in dist], axis=1)
+    return X, Y, f[:,:,0], f[:,:,1], f[:,:,2]
 
