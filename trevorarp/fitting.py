@@ -13,7 +13,7 @@ import warnings
 
 from scipy.optimize import leastsq
 from scipy.optimize import curve_fit
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, griddata
 from scipy.optimize import minimize_scalar
 
 from trevorarp.math import gauss, power_law, symm_exp, lorentzian
@@ -365,6 +365,16 @@ def mean_residual(data, fit):
     '''
     return np.mean(np.abs(data-fit))
 # end mean_residual
+
+'''
+Interpolates meshgrid data, wrapper for scipy.interpolate.griddata
+
+(x, y, D) are the meshgrid data you have
+(meshX and meshY) are the meshgrid to interpolate on.
+'''
+def interp_meshgrid(x, y, D, meshX, meshY):
+    return griddata((x.ravel(), y.ravel()), D.ravel(), (meshX, meshY))
+
 
 '''
 Takes a 2D scan and lowpases the columns of each scan using fitting.lowpass

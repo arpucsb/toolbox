@@ -43,6 +43,19 @@ def lowpass(data, cutoff=0.05, samprate=1.0):
     return filtfilt(b,a,data)
 # end lowpass
 
+def highpass(data, cutoff=0.05, samprate=1.0):
+    '''
+    A generic lowpass filter, based on a Butterworth filter.
+
+    Args:
+        data : The data to be filtered, considered to be sampled at 1 Hz
+        cutoff (float, optional) : The cutoff frequency in units of the nyquist frequency, must be less than 1
+        samprate (float, optional) : is the sample rate in Hz
+    '''
+    b,a = butter(2,cutoff/(samprate/2.0),btype='high',analog=0,output='ba')
+    return filtfilt(b,a,data)
+# end lowpass
+
 def lowpasspx(data, Npixels=50):
     '''
     A lowpass for data that is definied by the time/time_constant, meaning it is at the full limit of singal

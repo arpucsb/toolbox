@@ -62,6 +62,8 @@ nSOTColumnSpec = {
 "2D SQUID Cap n0p0 sweep no RT":(-1,"C",(0,2,'n0'), (1,3,'p0'), (4,5,6,7,8,9,10,11), ('Vs', 'Vb', 'SQUID_x', 'SQUID_y', 'Cs', 'Ds', 'X', 'Y')),
 # "2D SQUID Cap n0p0 linecut field", ("n0 index", "B index", 'n0', 'p0', cfg['magnet'], cfg[measurement]['v1'], cfg[measurement]['v2']),('SQUID_x','SQUID_y','Cs', 'Ds', 'X', 'Y'))
 "2D SQUID Cap n0p0 linecut field":(-1,"C",(0,2,'n0'), (1,4,'B'), (3,5,6,7,8,9,10,11,12), ('p0','Vs', 'Vb', 'SQUID_x', 'SQUID_y', 'Cs', 'Ds', 'X', 'Y')),
+# 'SQUID video vs n0',['n0 index','n0', 'p0','Vb','Vt','x index','y index','x coordinate', 'y coordinate'],['SQUID 1wx', 'SQUID 1wy']
+"SQUID video vs n0":(-1,"F", (5,7,'X'), (6,8,'Y'), (0,1,'n0'), (2,3,4,9,10), ('p0', 'Vb', 'Vt', 'SQUID_x', 'SQUID_y')),
 }
 
 def get_dv_data(identifier, remote=None, subfolder=None, params=False, retfilename=False, oldsystem=False):
@@ -341,7 +343,7 @@ def reshape_from_spec(d, spec, params=None, offbyone=False, iden=None):
             rows = int(np.max(trace[:,rvars[0]])) - int(np.min(trace[:,rvars[0]])) + 1
             cols = int(np.max(trace[:,cvars[0]])) - int(np.min(trace[:,cvars[0]])) + 1
 
-        #While data is still streeaming in rows, cols may not match the acutal number of rows
+        #While data is still streaming in rows, cols may not match the actual number of rows
         nd = len(trace[:,rvars[1]])
         if rows*cols > nd:
             print(iden, "is not complete, loading partially.")
@@ -420,6 +422,19 @@ def reshape_from_spec_3d(d, spec, params=None, offbyone=False, iden=None):
             rows = int(np.max(trace[:, rvars[0]])) - int(np.min(trace[:, rvars[0]])) + 1
             cols = int(np.max(trace[:, cvars[0]])) - int(np.min(trace[:, cvars[0]])) + 1
             znum = int(np.max(trace[:, zvars[0]])) - int(np.min(trace[:, zvars[0]])) + 1
+
+        # While data is still streaming in rows, cols may not match the actual number of rows
+        nd, cn = trace.shape
+        if rows * cols * znum > nd:
+            print(iden, "is not complete, loading partially.")
+            print(nd, rows, cols, znum)
+            rows = rows - 1
+            ix = int(rows * cols * znum)
+            trace = trace[:ix,:]
+            retrace = retrace[:ix, :]
+        elif rows * cols < nd:
+            print(iden, "warning row numbers off by one, attempting to correct.")
+            rows += 1
 
         rvalues = np.reshape(trace[:,rvars[1]],(znum, rows, cols), order=order)
         cvalues = np.reshape(trace[:,cvars[1]],(znum, rows, cols), order=order)

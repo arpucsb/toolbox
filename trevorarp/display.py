@@ -54,7 +54,7 @@ class figure_inches():
 
     def __init__(self, name=None, xinches="1", yinches="1", defaults=None, style='notes', dark=False):
         self.defaults = {
-        'xinches':4.5,
+        'xinches':4.8,
         'yinches':4.8,
         'xmargin':0.8,
         'ymargin':0.55,
@@ -128,7 +128,10 @@ class figure_inches():
             ypos (float) : position in inches of top of text
         '''
         if wrapnum is None:
-            wrapnum = 3*self.Nx
+            if self.Nx > 1:
+                wrapnum = 3*self.Nx
+            else:
+                wrapnum = 3
         if isinstance(iden, str):
             s = iden
         elif isinstance(iden, list):
