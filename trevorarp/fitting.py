@@ -376,58 +376,6 @@ def interp_meshgrid(x, y, D, meshX, meshY):
     return griddata((x.ravel(), y.ravel()), D.ravel(), (meshX, meshY))
 
 
-'''
-Takes a 2D scan and lowpases the columns of each scan using fitting.lowpass
-'''
-def lp_scan_cols(data, cutoff=0.05, samprate=1.0):
-    rows, cols = data.shape
-    original = np.copy(data)
-    for i in range(cols):
-        data[:,i] = lowpass(original[:,i], cutoff=cutoff, samprate=samprate)
-    return data
-# end lp_cube_cols
-
-'''
-Takes a data cube and lowpases the columns of each scan using fitting.lowpass
-'''
-def lp_cube_cols(datacube, cutoff=0.05, samprate=1.0):
-    rows, cols, N = datacube.shape
-    original = np.copy(datacube)
-    for j in range(N):
-        for i in range(cols):
-            datacube[:,i,j] = lowpass(original[:,i,j], cutoff=cutoff, samprate=samprate)
-    return datacube
-# end lp_cube_cols
-
-'''
-Takes a data cube and lowpases the rows, then the columns of each scan using fitting.lowpass
-'''
-def lp_cube_rows_cols(datacube, cutoff=0.05, samprate=1.0):
-    rows, cols, N = datacube.shape
-    original = np.copy(datacube)
-    for j in range(N):
-        for i in range(rows):
-            datacube[i,:,j] = lowpass(original[i,:,j], cutoff=cutoff, samprate=samprate)
-        for i in range(cols):
-            datacube[:,i,j] = lowpass(datacube[:,i,j], cutoff=cutoff, samprate=samprate)
-    return datacube
-# end lp_cube_cols
-
-'''
-Takes a data cube and subtracts out the background from each individual scan,
-determines the background from the values of the last $nx columns
-
-$ix is the number of columns at the end of each row to use as background
-'''
-def subtract_bg_cube(datacube, nx=20):
-    rows, cols, N = datacube.shape
-    for j in range(N):
-        n = np.mean(datacube[:,cols-nx:cols,j], axis=1)
-        for i in range(rows):
-            datacube[i,:,j] = datacube[i,:,j] - n[i]
-    return datacube
-# end subtract_bg_cube
-
 def max_from_interp(x, y, kind='cubic', N=200):
     '''
     Find the maximum of y in the range of x while interpolating to increase resolution.
