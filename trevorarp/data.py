@@ -66,6 +66,8 @@ nSOTColumnSpec = {
 "2D SQUID Cap n0p0 DC no RT":(-1,"C",(0,2,'n0'), (1,3,'p0'), (4,5,6,7,8,9,10,11,12), ('Vt', 'Vb', 'SQUID_x', 'SQUID_y', 'SQUID_DC', 'Cs', 'Ds', 'X', 'Y')),
 # "2D SQUID Transport n0p0", ("n0 index", "p0 index", 'n0', 'p0', cfg[measurement]['v1'], cfg[measurement]['v2']),('SQUID_x','SQUID_y','Ix', 'Iy', 'V1x', 'V1y', 'V2x', 'V2y'))
 "2D SQUID Transport n0p0":(-1,"C",(0,2,'n0'), (1,3,'p0'), (4,5,6,7,8,9,10,11,12,13), ('Vt', 'Vb', 'SQUID_x', 'SQUID_y', 'Ix', 'Iy', 'V1x', 'V1y', 'V2x', 'V2y')),
+# "2D SQUID Transport n0p0 Field", ("n0 index", "B index", 'n0', 'p0', cfg['magnet'], cfg[measurement]['v1'], cfg[measurement]['v2']),('SQUID_x','SQUID_y','Ix', 'Iy', 'V1x', 'V1y', 'V2x', 'V2y'
+"2D SQUID Transport n0p0 Field":(-1,"C",(0,2,'n0'), (1,4,'B'), (3,5,6,7,8,9,10,11,12,13, 14), ('p0', 'Vt', 'Vb', 'SQUID_x', 'SQUID_y', 'Ix', 'Iy', 'V1x', 'V1y', 'V2x', 'V2y')),
 # 'SQUID video vs n0',['n0 index','n0', 'p0','Vb','Vt','x index','y index','x coordinate', 'y coordinate'],['SQUID 1wx', 'SQUID 1wy']
 "SQUID video vs n0":(-1,"F", (5,7,'X'), (6,8,'Y'), (0,1,'n0'), (2,3,4,9,10), ('p0', 'Vb', 'Vt', 'SQUID_x', 'SQUID_y')),
 }
