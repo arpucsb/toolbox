@@ -131,6 +131,7 @@ def get_dv_data(identifier, remote=None, subfolder=None, params=False, retfilena
                     parameters[p[0]] = float(p[1])
                 else:
                     parameters[p[0]] = p[1]
+        del dv # Somehow querying parameters keeps the files open?
 
     if retfilename and params:
         return data, parameters, datafile
@@ -271,16 +272,18 @@ def get_reshaped_nSOT_data(iden, quickload=None, overwrite=False, remote=None, s
     if (quickload is not None) and not overwrite:
         if exists(quickload):
             if exists(join(quickload,iden + ".npz")):
-                data = np.load(join(quickload,iden + ".npz"))
+                data = np.load(join(quickload,iden + ".npz"), allow_pickle=True)
                 # rvalues, cvalues, dependent, dependent_retrace, labels, params
                 if 'zvalues' in data:
                     if params:
-                        return data['rvalues'], data['cvalues'], data['zvalues'], data['dependent'], data['dependent_retrace'], data['labels'], data['params']
+                        dvparams = dict(data['params'].item())
+                        return data['rvalues'], data['cvalues'], data['zvalues'], data['dependent'], data['dependent_retrace'], data['labels'], dvparams
                     else:
                         return data['rvalues'], data['cvalues'], data['zvalues'], data['dependent'], data['dependent_retrace'], data['labels']
                 else:
                     if params:
-                        return data['rvalues'], data['cvalues'], data['dependent'], data['dependent_retrace'], data['labels'], data['params']
+                        dvparams = dict(data['params'].item())
+                        return data['rvalues'], data['cvalues'], data['dependent'], data['dependent_retrace'], data['labels'], dvparams
                     else:
                         return data['rvalues'], data['cvalues'], data['dependent'], data['dependent_retrace'], data['labels']
         else:
@@ -364,6 +367,11 @@ def reshape_from_spec(d, spec, params=None, offbyone=False, iden=None):
     except ValueError:
         print("Error reshaping the data array, check that the specification is correct.")
         print(format_exc())
+        return
+    except IndexError:
+        print("Error reshaping the data array, check that the specification is correct.")
+        print(format_exc())
+        print("data shape", d.shape)
         return
 
     dependent = []
