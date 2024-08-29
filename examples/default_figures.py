@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import trevorarp as tb
 
-fi = tb.display.figure_inches("Default Title","2","2", dark=True)
+fi = tb.display.figure_inches("Default Title","2","2")
 ax1 = fi.make_axes()
 ax2, ax2cb = fi.make_img_axes()
 ax3 = fi.make_axes()

@@ -54,14 +54,14 @@ class figure_inches():
 
     def __init__(self, name=None, xinches="1", yinches="1", defaults=None, style='notes', dark=False):
         self.defaults = {
-        'xinches':4.8,
-        'yinches':4.8,
-        'xmargin':0.8,
-        'ymargin':0.55,
-        'height':3.5,
-        'width':4.0,
-        'xint':0.8,
-        'yint':0.8
+        'xinches':4.25,
+        'yinches':4.25,
+        'xmargin':0.5,
+        'ymargin':0.5,
+        'height':3.0,
+        'width':3.0,
+        'xint':0.75,
+        'yint':0.75
         }
         if defaults is not None:
             for k, v in defaults.items():
@@ -172,7 +172,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -197,7 +197,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -225,7 +225,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['height'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['height'], self.defaults['height']]
@@ -265,7 +265,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -318,7 +318,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -368,7 +368,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -505,7 +505,7 @@ def figure_format(fntsize=12, font=None, bilinear=True, labelpad=0):
     mpl.rcParams["keymap.fullscreen"] = '' # To prevent f from being fullscreen
 # end figure_format
 
-def notes_format(fntsize=12, tickfntsize=9, font=None, bilinear=True, dark=False):
+def notes_format(fntsize=11, tickfntsize=8, font=None, bilinear=True, dark=False):
     '''
     A simplistic format meant for notes and easy display, allowing axes to be shown
     without having to worry too much about the formatting of the axes.
