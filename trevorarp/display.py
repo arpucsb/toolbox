@@ -56,12 +56,12 @@ class figure_inches():
         self.defaults = {
         'xinches':4.25,
         'yinches':4.25,
-        'xmargin':0.5,
+        'xmargin':0.65,
         'ymargin':0.5,
         'height':3.0,
         'width':3.0,
         'xint':0.75,
-        'yint':0.75
+        'yint':1.0
         }
         if defaults is not None:
             for k, v in defaults.items():
@@ -581,7 +581,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=-1):
     return new_cmap
 # end truncate_colormap
 
-def colorscale_map(darray, mapname='viridis', cmin=None, cmax=None, centerzero=False, truncate=None):
+def colorscale_map(darray, mapname='dualcmr', cmin=None, cmax=None, centerzero=False, truncate=None):
     '''
     Generates a Colormap, Normalization and ScalarMappable objects for the given data.
 
@@ -602,6 +602,10 @@ def colorscale_map(darray, mapname='viridis', cmin=None, cmax=None, centerzero=F
     '''
     if mapname == 'cmbipolar':
         cmap = get_cmbipolar()
+    elif mapname == 'dualcmr':
+        cmap = cmr.combine_cmaps("cmr.voltage","cmr.sunburst_r")
+    elif mapname == 'dualcmr2':
+        cmap = cmr.combine_cmaps("cmr.voltage_r","cmr.sunburst")
     else:
         cmap = plt.get_cmap(mapname)
     if truncate is not None:
@@ -897,3 +901,15 @@ def get_cmbipolar(lsp=500):
     newcmp = get_continuous_cmap(vals)
     return newcmp
 #
+
+def no_ticks(ax):
+    '''
+    Utility to set the ticks to zero on both axes
+    Args:
+        ax: The axes you want to remove ticks on
+
+    Returns:
+
+    '''
+    ax.set_xticks([])
+    ax.set_yticks([])

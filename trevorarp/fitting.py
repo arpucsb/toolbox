@@ -13,8 +13,9 @@ import warnings
 
 from scipy.optimize import leastsq
 from scipy.optimize import curve_fit
-from scipy.interpolate import interp1d, griddata
 from scipy.optimize import minimize_scalar
+from scipy.interpolate import interp1d, griddata
+from scipy.interpolate import RegularGridInterpolator
 
 from trevorarp.math import gauss, power_law, symm_exp, lorentzian
 from trevorarp.processing import lowpass
@@ -62,7 +63,7 @@ def leastsq_2D_fit(x, y, data, p0, fitfunc):
         y : the column variable of the data.
         data : a 2D array as a function of x and y
         p0 : the initial guesses of the parameters
-        fitfunc : the function to minimize, takes params func(x, y, \*p) and returns a 2D array
+        fitfunc : the function to minimize, takes params func(x, y, *p) and returns a 2D array
             in the same format as the data.
 
     Returns:
@@ -202,6 +203,35 @@ def lorentzian_fit(x, y, p0=None, warn=True):
         p0=(a, x0, 0.5, y0)
     return generic_fit(x, y, p0, lorentzian, warn=warn)
 # end gauss_fit
+
+def interpolate_and_resample_image(image, new_shape):
+    """
+    Interpolates and resamples a 2D image using a regular grid interpolator.
+
+    Args:
+        image (numpy.ndarray): The input image as a 2D numpy array.
+        new_shape (tuple): The desired output shape as a tuple of (height, width).
+
+    Returns:
+        numpy.ndarray: The resampled image as a 2D numpy array.
+    """
+
+    # Create grid coordinates for the original image
+    x = np.arange(image.shape[1])
+    y = np.arange(image.shape[0])
+
+    # Create an interpolator
+    interp_func = RegularGridInterpolator((y, x), image, method='linear')
+
+    # Generate grid coordinates for the new image
+    new_x = np.linspace(0, image.shape[1] - 1, new_shape[1])
+    new_y = np.linspace(0, image.shape[0] - 1, new_shape[0])
+    new_xx, new_yy = np.meshgrid(new_x, new_y)
+
+    # Interpolate the image at the new coordinates
+    resampled_image = interp_func((new_yy, new_xx))
+
+    return resampled_image
 
 def interp_maximum(x, y, kind='cubic', warn=True):
 	'''
