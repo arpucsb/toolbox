@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap
-from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
+# from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import cmasher as cmr # colorscales
 
 import addcopyfighandler
@@ -281,15 +281,17 @@ class figure_inches():
             zorderr = zorder + 1
         #
 
-        axl = plt.axes([spec[0]+1, spec[1]+1, spec[2]+1, spec[3]+1], zorder=zorderl)
-        axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axl = plt.axes([spec[0]+1, spec[1]+1, spec[2]+1, spec[3]+1], zorder=zorderl)
+        # axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axl = ax0.inset_axes([0, 0, 1, 1])
         axl.patch.set_alpha(0)
         axl.tick_params('y', which='both', colors=color_left)
         axl.spines['left'].set_color(color_left)
         axl.spines['right'].set_color(color_right)
 
-        axr = plt.axes([spec[0]+2, spec[1]+2, spec[2]+2, spec[3]+2], zorder=zorderr)
-        axr.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axr = plt.axes([spec[0]+2, spec[1]+2, spec[2]+2, spec[3]+2], zorder=zorderr)
+        # axr.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axr = ax0.inset_axes([0, 0, 1, 1])
         axr.patch.set_alpha(0)
         axr.xaxis.set_visible(False)
         axr.yaxis.tick_right()
@@ -326,15 +328,17 @@ class figure_inches():
         ax0 = plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches])
         ax0.axis('off')
 
-        axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder)
-        axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder)
+        # axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axb = ax0.inset_axes([0, 0, 1, 1])
         axb.patch.set_alpha(0)
         axb.tick_params('x', which='both', colors=color_bottom)
         axb.spines['bottom'].set_color(color_bottom)
         axb.spines['top'].set_color(color_top)
 
-        axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder+1)
-        axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder+1)
+        # axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axt = ax0.inset_axes([0, 0, 1, 1])
         axt.patch.set_alpha(0)
         axt.yaxis.set_visible(False)
         axt.xaxis.tick_top()
@@ -376,8 +380,9 @@ class figure_inches():
         ax0 = plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches])
         ax0.axis('off')
 
-        axl = plt.axes([spec[0]+4, spec[0]+4, spec[0]+4, spec[0]+4], zorder=zorder+3)
-        axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axl = plt.axes([spec[0]+4, spec[0]+4, spec[0]+4, spec[0]+4], zorder=zorder+3)
+        # axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axl = ax0.inset_axes([0, 0, 1, 1])
         axl.patch.set_alpha(0)
         axl.xaxis.set_visible(False)
         axl.tick_params('y', which='both', colors=color_left)
@@ -386,24 +391,27 @@ class figure_inches():
         axl.spines['top'].set_color(color_top)
         axl.spines['bottom'].set_color(color_bottom)
 
-        axr = plt.axes([spec[0]+3, spec[0]+3, spec[0]+3, spec[0]+3], zorder=zorder+2)
-        axr.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axr = plt.axes([spec[0]+3, spec[0]+3, spec[0]+3, spec[0]+3], zorder=zorder+2)
+        # axr.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axr = ax0.inset_axes([0, 0, 1, 1])
         axr.patch.set_alpha(0)
         axr.xaxis.set_visible(False)
         axr.yaxis.tick_right()
         axr.yaxis.set_label_position("right")
         axr.tick_params('y', which='both', colors=color_right)
 
-        axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder+1)
-        axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder+1)
+        # axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axb = ax0.inset_axes([0, 0, 1, 1])
         axb.patch.set_alpha(0)
         axb.yaxis.set_visible(False)
         axb.xaxis.tick_bottom()
         axb.xaxis.set_label_position("bottom")
         axb.tick_params('x', which='both', colors=color_bottom)
 
-        axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder)
-        axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        # axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder)
+        # axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
+        axt = ax0.inset_axes([0, 0, 1, 1])
         axt.patch.set_alpha(0)
         axt.yaxis.set_visible(False)
         axt.xaxis.tick_top()
