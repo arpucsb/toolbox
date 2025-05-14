@@ -13,8 +13,9 @@ import warnings
 
 from scipy.optimize import leastsq
 from scipy.optimize import curve_fit
-from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
+from scipy.interpolate import interp1d, griddata
+from scipy.interpolate import RegularGridInterpolator
 
 from trevorarp.math import gauss, power_law, symm_exp, lorentzian
 from trevorarp.processing import lowpass
@@ -62,7 +63,7 @@ def leastsq_2D_fit(x, y, data, p0, fitfunc):
         y : the column variable of the data.
         data : a 2D array as a function of x and y
         p0 : the initial guesses of the parameters
-        fitfunc : the function to minimize, takes params func(x, y, \*p) and returns a 2D array
+        fitfunc : the function to minimize, takes params func(x, y, *p) and returns a 2D array
             in the same format as the data.
 
     Returns:
@@ -202,6 +203,35 @@ def lorentzian_fit(x, y, p0=None, warn=True):
         p0=(a, x0, 0.5, y0)
     return generic_fit(x, y, p0, lorentzian, warn=warn)
 # end gauss_fit
+
+def interpolate_and_resample_image(image, new_shape):
+    """
+    Interpolates and resamples a 2D image using a regular grid interpolator.
+
+    Args:
+        image (numpy.ndarray): The input image as a 2D numpy array.
+        new_shape (tuple): The desired output shape as a tuple of (height, width).
+
+    Returns:
+        numpy.ndarray: The resampled image as a 2D numpy array.
+    """
+
+    # Create grid coordinates for the original image
+    x = np.arange(image.shape[1])
+    y = np.arange(image.shape[0])
+
+    # Create an interpolator
+    interp_func = RegularGridInterpolator((y, x), image, method='linear')
+
+    # Generate grid coordinates for the new image
+    new_x = np.linspace(0, image.shape[1] - 1, new_shape[1])
+    new_y = np.linspace(0, image.shape[0] - 1, new_shape[0])
+    new_xx, new_yy = np.meshgrid(new_x, new_y)
+
+    # Interpolate the image at the new coordinates
+    resampled_image = interp_func((new_yy, new_xx))
+
+    return resampled_image
 
 def interp_maximum(x, y, kind='cubic', warn=True):
 	'''
@@ -367,56 +397,14 @@ def mean_residual(data, fit):
 # end mean_residual
 
 '''
-Takes a 2D scan and lowpases the columns of each scan using fitting.lowpass
-'''
-def lp_scan_cols(data, cutoff=0.05, samprate=1.0):
-    rows, cols = data.shape
-    original = np.copy(data)
-    for i in range(cols):
-        data[:,i] = lowpass(original[:,i], cutoff=cutoff, samprate=samprate)
-    return data
-# end lp_cube_cols
+Interpolates meshgrid data, wrapper for scipy.interpolate.griddata
 
+(x, y, D) are the meshgrid data you have
+(meshX and meshY) are the meshgrid to interpolate on.
 '''
-Takes a data cube and lowpases the columns of each scan using fitting.lowpass
-'''
-def lp_cube_cols(datacube, cutoff=0.05, samprate=1.0):
-    rows, cols, N = datacube.shape
-    original = np.copy(datacube)
-    for j in range(N):
-        for i in range(cols):
-            datacube[:,i,j] = lowpass(original[:,i,j], cutoff=cutoff, samprate=samprate)
-    return datacube
-# end lp_cube_cols
+def interp_meshgrid(x, y, D, meshX, meshY):
+    return griddata((x.ravel(), y.ravel()), D.ravel(), (meshX, meshY))
 
-'''
-Takes a data cube and lowpases the rows, then the columns of each scan using fitting.lowpass
-'''
-def lp_cube_rows_cols(datacube, cutoff=0.05, samprate=1.0):
-    rows, cols, N = datacube.shape
-    original = np.copy(datacube)
-    for j in range(N):
-        for i in range(rows):
-            datacube[i,:,j] = lowpass(original[i,:,j], cutoff=cutoff, samprate=samprate)
-        for i in range(cols):
-            datacube[:,i,j] = lowpass(datacube[:,i,j], cutoff=cutoff, samprate=samprate)
-    return datacube
-# end lp_cube_cols
-
-'''
-Takes a data cube and subtracts out the background from each individual scan,
-determines the background from the values of the last $nx columns
-
-$ix is the number of columns at the end of each row to use as background
-'''
-def subtract_bg_cube(datacube, nx=20):
-    rows, cols, N = datacube.shape
-    for j in range(N):
-        n = np.mean(datacube[:,cols-nx:cols,j], axis=1)
-        for i in range(rows):
-            datacube[i,:,j] = datacube[i,:,j] - n[i]
-    return datacube
-# end subtract_bg_cube
 
 def max_from_interp(x, y, kind='cubic', N=200):
     '''

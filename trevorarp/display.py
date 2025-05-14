@@ -4,7 +4,7 @@ display.py
 A module for general functions related to displaying information, for functions and classes related
 to displaying specific kinds of information see visual.py
 
-Last updated August 2022
+Last updated July 2023
 
 by Trevor Arp
 All Rights Reserved
@@ -16,6 +16,7 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
+import cmasher as cmr # colorscales
 
 import addcopyfighandler
 from datetime import datetime
@@ -25,7 +26,8 @@ import numpy as np
 from scipy.ndimage import center_of_mass
 from scipy.ndimage.interpolation import shift
 
-from trevorarp.fitting import power_law, power_law_fit
+from trevorarp.math import power_law
+from trevorarp.fitting import power_law_fit
 
 class figure_inches():
     '''
@@ -52,14 +54,14 @@ class figure_inches():
 
     def __init__(self, name=None, xinches="1", yinches="1", defaults=None, style='notes', dark=False):
         self.defaults = {
-        'xinches':5.0,
-        'yinches':4.8,
-        'xmargin':0.8,
-        'ymargin':0.55,
-        'height':3.5,
-        'width':4.0,
-        'xint':0.8,
-        'yint':0.8
+        'xinches':4.25,
+        'yinches':4.25,
+        'xmargin':0.65,
+        'ymargin':0.5,
+        'height':3.0,
+        'width':3.0,
+        'xint':0.75,
+        'yint':1.0
         }
         if defaults is not None:
             for k, v in defaults.items():
@@ -111,7 +113,7 @@ class figure_inches():
             plt.style.use('dark_background')
         else:
             facecolor='w'
-
+        self.axes = []
         self.fig = plt.figure(self.name, figsize=(self.xinches, self.yinches), facecolor=facecolor)
     # end init
 
@@ -126,7 +128,10 @@ class figure_inches():
             ypos (float) : position in inches of top of text
         '''
         if wrapnum is None:
-            wrapnum = 3*self.Nx
+            if self.Nx > 1:
+                wrapnum = 3*self.Nx
+            else:
+                wrapnum = 3
         if isinstance(iden, str):
             s = iden
         elif isinstance(iden, list):
@@ -167,12 +172,14 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
         plt.figure(self.name)
-        return plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder)
+        ax = plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder)
+        self.axes.append(ax)
+        return ax
     # make_axes
 
     def make_3daxes(self, spec=None, zorder=1):
@@ -190,15 +197,17 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
         plt.figure(self.name)
-        return plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder, projection='3d')
+        ax =  plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder, projection='3d')
+        self.axes.append(ax)
+        return ax
     # make_3daxes
 
-    def make_img_axes(self, spec=None, cbpercent=0.5, cbmargin=0.1, cbheightpercent=0.2, zorder=1):
+    def make_img_axes(self, spec=None, cbpercent=0.4, cbmargin=0.1, cbheightpercent=0.15, zorder=1):
         '''
         Makes and returns a matplotlib Axes object with a default colorbar.
         To easily make a colorbar in the title area.
@@ -216,7 +225,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['height'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['height'], self.defaults['height']]
@@ -233,6 +242,8 @@ class figure_inches():
         cb = plt.axes([xpos+width-cbwidth, ypos+height+margin, cbwidth, cbheight], zorder=zorder)
         xaxis_top(cb)
         cb.__display_default_flag__ = True
+        self.axes.append(ax)
+        self.axes.append(cb)
         return ax, cb
     # make_axes_and_cb
 
@@ -254,7 +265,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -273,7 +284,7 @@ class figure_inches():
         axl = plt.axes([spec[0]+1, spec[1]+1, spec[2]+1, spec[3]+1], zorder=zorderl)
         axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axl.patch.set_alpha(0)
-        axl.tick_params('y', colors=color_left)
+        axl.tick_params('y', which='both', colors=color_left)
         axl.spines['left'].set_color(color_left)
         axl.spines['right'].set_color(color_right)
 
@@ -283,14 +294,16 @@ class figure_inches():
         axr.xaxis.set_visible(False)
         axr.yaxis.tick_right()
         axr.yaxis.set_label_position("right")
-        axr.tick_params('y', colors=color_right)
+        axr.tick_params('y', which='both', colors=color_right)
+        self.axes.append(axl)
+        self.axes.append(axr)
         return axl, axr
     # make_dualy_axes
 
     def make_dualx_axes(self, spec=None, color_bottom='k', color_top='k', zorder=1):
         '''
         Makes and returns two overlaid axes, with two y axes sharing the same x-axis. Note, the
-        first axes returned (the bottom x-axis) is "on top" and provides the y-axis
+        first axes returned (the bottom x-axis) is "on bottom" and provides the y-axis
 
         Args:
             spec : A list of the dimensions of the axis [left, bottom, width, height] in inches
@@ -305,7 +318,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -313,20 +326,22 @@ class figure_inches():
         ax0 = plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches])
         ax0.axis('off')
 
-        axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder+1)
+        axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder)
         axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axb.patch.set_alpha(0)
-        axb.tick_params('x', colors=color_bottom)
+        axb.tick_params('x', which='both', colors=color_bottom)
         axb.spines['bottom'].set_color(color_bottom)
         axb.spines['top'].set_color(color_top)
 
-        axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder)
+        axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder+1)
         axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axt.patch.set_alpha(0)
         axt.yaxis.set_visible(False)
         axt.xaxis.tick_top()
         axt.xaxis.set_label_position("top")
-        axt.tick_params('x', colors=color_top)
+        axt.tick_params('x', which='both', colors=color_top)
+        self.axes.append(axb)
+        self.axes.append(axt)
         return axb, axt
     # make_dualx_axes
 
@@ -353,7 +368,7 @@ class figure_inches():
             self.default_xstart = self.default_xstart + self.defaults['width'] + self.defaults['xint']
             if self.default_figs_x >= self.Nx:
                 self.default_figs_x = 0
-                self.default_xstart = self.defaults['xint']
+                self.default_xstart = self.defaults['xmargin']
                 self.default_ystart = self.default_ystart - self.defaults['height'] - self.defaults['yint']
         elif len(spec) == 2:
             spec = [spec[0], spec[1], self.defaults['width'], self.defaults['height']]
@@ -365,7 +380,7 @@ class figure_inches():
         axl.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
         axl.patch.set_alpha(0)
         axl.xaxis.set_visible(False)
-        axl.tick_params('y', colors=color_left)
+        axl.tick_params('y', which='both', colors=color_left)
         axl.spines['left'].set_color(color_left)
         axl.spines['right'].set_color(color_right)
         axl.spines['top'].set_color(color_top)
@@ -377,7 +392,7 @@ class figure_inches():
         axr.xaxis.set_visible(False)
         axr.yaxis.tick_right()
         axr.yaxis.set_label_position("right")
-        axr.tick_params('y', colors=color_right)
+        axr.tick_params('y', which='both', colors=color_right)
 
         axb = plt.axes([spec[0]+1, spec[0]+1, spec[0]+1, spec[0]+1], zorder=zorder+1)
         axb.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
@@ -385,7 +400,7 @@ class figure_inches():
         axb.yaxis.set_visible(False)
         axb.xaxis.tick_bottom()
         axb.xaxis.set_label_position("bottom")
-        axb.tick_params('x', colors=color_bottom)
+        axb.tick_params('x', which='both', colors=color_bottom)
 
         axt = plt.axes([spec[0]+2, spec[0]+2, spec[0]+2, spec[0]+2], zorder=zorder)
         axt.set_axes_locator(InsetPosition(ax0, [0.0, 0.0, 1.0, 1.0]))
@@ -393,7 +408,11 @@ class figure_inches():
         axt.yaxis.set_visible(False)
         axt.xaxis.tick_top()
         axt.xaxis.set_label_position("top")
-        axt.tick_params('x', colors=color_top)
+        axt.tick_params('x', which='both', colors=color_top)
+        self.axes.append(axb)
+        self.axes.append(axt)
+        self.axes.append(axl)
+        self.axes.append(axr)
         return axl, axr, axb, axt
     # make_dualx_axes
 
@@ -486,7 +505,7 @@ def figure_format(fntsize=12, font=None, bilinear=True, labelpad=0):
     mpl.rcParams["keymap.fullscreen"] = '' # To prevent f from being fullscreen
 # end figure_format
 
-def notes_format(fntsize=12, tickfntsize=10, font=None, bilinear=True, dark=False):
+def notes_format(fntsize=11, tickfntsize=8, font=None, bilinear=True, dark=False):
     '''
     A simplistic format meant for notes and easy display, allowing axes to be shown
     without having to worry too much about the formatting of the axes.
@@ -507,7 +526,7 @@ def notes_format(fntsize=12, tickfntsize=10, font=None, bilinear=True, dark=Fals
     mpl.rcParams.update({'font.size':fntsize})
     mpl.rcParams.update({'xtick.labelsize':tickfntsize})
     mpl.rcParams.update({'ytick.labelsize':tickfntsize})
-    mpl.rcParams.update({'axes.labelpad': 8})
+    mpl.rcParams.update({'axes.labelpad': 5})
     mpl.rcParams.update({'axes.titlepad': 6})
     mpl.rcParams.update({'xtick.direction':'out'})
     mpl.rcParams.update({'ytick.direction':'out'})
@@ -533,8 +552,8 @@ def change_axes_colors(ax, c):
     '''
     ax.yaxis.label.set_color(c)
     ax.xaxis.label.set_color(c)
-    ax.tick_params(axis='x', colors=c)
-    ax.tick_params(axis='y', colors=c)
+    ax.tick_params(axis='x', which='both', colors=c)
+    ax.tick_params(axis='y', which='both', colors=c)
     ax.spines['bottom'].set_color(c)
     ax.spines['top'].set_color(c)
     ax.spines['left'].set_color(c)
@@ -562,7 +581,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=-1):
     return new_cmap
 # end truncate_colormap
 
-def colorscale_map(darray, mapname='viridis', cmin=None, cmax=None, centerzero=False, truncate=None):
+def colorscale_map(darray, mapname='dualcmr', cmin=None, cmax=None, centerzero=False, truncate=None):
     '''
     Generates a Colormap, Normalization and ScalarMappable objects for the given data.
 
@@ -583,6 +602,10 @@ def colorscale_map(darray, mapname='viridis', cmin=None, cmax=None, centerzero=F
     '''
     if mapname == 'cmbipolar':
         cmap = get_cmbipolar()
+    elif mapname == 'dualcmr':
+        cmap = cmr.combine_cmaps("cmr.voltage","cmr.sunburst_r")
+    elif mapname == 'dualcmr2':
+        cmap = cmr.combine_cmaps("cmr.voltage_r","cmr.sunburst")
     else:
         cmap = plt.get_cmap(mapname)
     if truncate is not None:
@@ -600,7 +623,7 @@ def colorscale_map(darray, mapname='viridis', cmin=None, cmax=None, centerzero=F
     return cmap, cNorm, scalarMap
 # end colorscale_map
 
-def make_colorbar(ax, cmap, cnorm, orientation='vertical', ticks=None, ticklabels=None, color='k', alpha=None):
+def make_colorbar(ax, cmap, cnorm, title=None, ttlparams=None, orientation='vertical', ticks=None, ticklabels=None, color='k', alpha=None):
     '''
     Instantiates and returns a colorbar object for the given axes, with a few more options than
     instantiating directly
@@ -609,6 +632,8 @@ def make_colorbar(ax, cmap, cnorm, orientation='vertical', ticks=None, ticklabel
         ax : The axes to make the colorbar on.
         cmap : The Colormap
         norm : The Normalization
+        title: Text to place to the left on a horizonal colorbar or at the top of a vertical colorbar
+        ttlparams: Dictionary of text parameters to pass to the title annotation
         orientation (str, optional) : 'vertical' (default) or 'horizontal' orientation
         ticks (list, optional) : the locations of the ticks. If None will let matplotlib automatically set them.
         ticklabels (list, optional) : the labels of the ticks. If None will let matplotlib automatically set them.
@@ -636,6 +661,13 @@ def make_colorbar(ax, cmap, cnorm, orientation='vertical', ticks=None, ticklabel
     if xtop:
         xaxis_top(ax)
         ax.tick_params(pad=0)
+    if title is not None:
+        if ttlparams is None:
+            ttlparams = {}
+        if orientation == 'horizontal':
+            ax.text(-0.05, 0.5, title, transform=ax.transAxes, va='center', ha='right', **ttlparams)
+        else:
+            ax.text(0.5, 1.05, title, transform=ax.transAxes, va='bottom', ha='center', **ttlparams)
     return cb
 # end make_colorbar
 
@@ -869,3 +901,15 @@ def get_cmbipolar(lsp=500):
     newcmp = get_continuous_cmap(vals)
     return newcmp
 #
+
+def no_ticks(ax):
+    '''
+    Utility to set the ticks to zero on both axes
+    Args:
+        ax: The axes you want to remove ticks on
+
+    Returns:
+
+    '''
+    ax.set_xticks([])
+    ax.set_yticks([])

@@ -3,7 +3,7 @@ math.py
 
 A module for various general use mathematical functions
 
-Last updated February 2020
+Last updated July 2023
 
 by Trevor Arp
 All Rights Reserved
@@ -141,11 +141,11 @@ def Box(x, start, stop):
 	return HTheta(x-start) - HTheta(x-stop)
 # end Box
 
-'''
-A logistic function that continuously switches between two values yl and yr
-
-Smoother version of the step function.
-'''
 def logistic_shift(x, k, yl, yr):
-    return yl + yr/(1+np.exp(-k*x))
+	'''
+	A logistic function that continuously switches between two values yl and yr
+
+	Smoother version of the step function.
+	'''
+	return yl + yr/(1+np.exp(-k*x))
 # logistic_shift
