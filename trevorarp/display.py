@@ -198,7 +198,7 @@ class figure_inches():
         return plt.axes([spec[0]/self.xinches, spec[1]/self.yinches, spec[2]/self.xinches, spec[3]/self.yinches], zorder=zorder, projection='3d')
     # make_3daxes
 
-    def make_img_axes(self, spec=None, cbpercent=0.5, zorder=1):
+    def make_img_axes(self, spec=None, cbpercent=0.5, cbmargin=0.1, cbheightpercent=0.2, zorder=1):
         '''
         Makes and returns a matplotlib Axes object with a default colorbar.
         To easily make a colorbar in the title area.
@@ -227,9 +227,9 @@ class figure_inches():
         height = spec[3]/self.yinches
         ax = plt.axes([xpos, ypos, width, height], zorder=zorder)
 
-        margin = 0.1/self.yinches #min([0.1*height]
+        margin = cbmargin/self.yinches #min([0.1*height]
         cbwidth = cbpercent*width
-        cbheight = 0.2/self.yinches
+        cbheight = cbheightpercent/self.yinches
         cb = plt.axes([xpos+width-cbwidth, ypos+height+margin, cbwidth, cbheight], zorder=zorder)
         xaxis_top(cb)
         cb.__display_default_flag__ = True
